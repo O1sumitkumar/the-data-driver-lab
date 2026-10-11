@@ -37,13 +37,13 @@ function apiOrigin(base) {
   return url.origin;
 }
 
-export function createMcpFetcher(base = DEFAULT_PUBLIC_API_ORIGIN, fetchImpl = fetch) {
+export function createMcpFetcher(base = DEFAULT_PUBLIC_API_ORIGIN, fetchImpl = fetch, headers = { Accept: 'application/json' }) {
   const origin = apiOrigin(base);
   return async (path) => {
     const segments = path.replace(/^\//, '').split('/');
     if (!isAllowedProxyPath('GET', segments)) return { status: 404, body: { status: 'error', error: { message: 'Path not allowed.' } } };
     try {
-      const response = await fetchImpl(`${origin}${path}`, { method: 'GET', headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8_000), cache: 'no-store', redirect: 'error' });
+      const response = await fetchImpl(`${origin}${path}`, { method: 'GET', headers, signal: AbortSignal.timeout(8_000), cache: 'no-store', redirect: 'error' });
       if (Number(response.headers.get('content-length')) > MAX_UPSTREAM_BYTES) throw new Error('Upstream response too large.');
       const reader = response.body?.getReader();
       if (!reader) throw new Error('Empty upstream response.');
@@ -124,7 +124,7 @@ export async function fetchEntity(id, runner) {
   return { id, title: documentTitle(driver.name, season), text: JSON.stringify({ driver, source: data.source, availability: data.availability, reason: data.reason }), url: data.source.api_url, metadata: { source: data.source.name, licence: data.source.licence } };
 }
 
-export function createF1McpServer({ apiBase = DEFAULT_PUBLIC_API_ORIGIN, fetchJson = createMcpFetcher(apiBase) } = {}) {
+export function createF1McpServer({ apiBase = DEFAULT_PUBLIC_API_ORIGIN, upstreamHeaders = { Accept: 'application/json' }, fetchJson = createMcpFetcher(apiBase, fetch, upstreamHeaders) } = {}) {
   const server = new McpServer({ name: 'The Data Driver — F1 data', version: '1.0.0' }, { instructions: MCP_INSTRUCTIONS });
   const runner = createF1ToolRunner({ fetchJson, publicOrigin: apiOrigin(apiBase) });
   for (const tool of F1_TOOLS) server.registerTool(tool.name, {

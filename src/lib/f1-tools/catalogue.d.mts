@@ -55,7 +55,7 @@ export declare function availabilityOf(data: unknown): { availability?: string; 
 export declare function boundRows<T>(rows: T[] | unknown, max: number): { rows: T[]; truncated?: { shown: number; total: number } };
 export declare function fitResult(result: F1ToolResult, maxChars?: number): F1ToolResult;
 export declare function createProxyFetcher(base?: string, timeoutMs?: number): F1Fetcher;
-export declare function createHttpFetcher(apiBase?: string, timeoutMs?: number): F1Fetcher;
+export declare function createHttpFetcher(apiBase?: string, timeoutMs?: number, headers?: HeadersInit): F1Fetcher;
 export declare function createSnapshotFetcher(snapshot: Record<string, { status: number; body: unknown }>): F1Fetcher;
 export declare function createF1ToolRunner(options: { fetchJson: F1Fetcher; publicOrigin?: string }): F1ToolRunner;
 export declare function toolJsonSchemas(): { name: string; title: string; description: string; inputSchema: Record<string, unknown> }[];

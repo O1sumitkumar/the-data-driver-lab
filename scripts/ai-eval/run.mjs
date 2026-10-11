@@ -30,6 +30,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createF1ToolRunner, createHttpFetcher, createSnapshotFetcher, DEFAULT_PUBLIC_API_ORIGIN } from "../../src/lib/f1-tools/catalogue.mjs";
+import { serverApiHeaders } from "../../src/lib/server-api-headers.mjs";
 import { checkSettings, PROVIDERS } from "../../src/lib/ai-byok/providers.mjs";
 import { collectSources, createLanguageModel, streamGroundedAnswer } from "../../src/lib/ai-byok/agent.mjs";
 import { createFakeOpenAIServer } from "./fake-openai.mjs";
@@ -75,9 +76,10 @@ async function askModel(model, fetcher, question) {
 }
 
 async function askDeterministic(apiBase, question) {
+  const headers = { "Content-Type": "application/json", Accept: "application/json" };
   const response = await fetch(`${apiBase}/v1/f1/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: apiBase === DEFAULT_PUBLIC_API_ORIGIN ? serverApiHeaders(headers) : headers,
     body: JSON.stringify({ message: question }),
     signal: AbortSignal.timeout(30_000),
   });
@@ -115,7 +117,7 @@ async function main() {
     const checked = checkSettings({ provider, model: option("model"), baseURL: option("base-url") ?? undefined, apiKey: process.env.TDD_EVAL_API_KEY ?? "" });
     if (!checked.ok) throw new Error(checked.error);
     const model = createLanguageModel(checked.value);
-    const fetcher = option("tools", "snapshot") === "live" ? createHttpFetcher(DEFAULT_PUBLIC_API_ORIGIN) : createSnapshotFetcher(snapshot.responses);
+    const fetcher = option("tools", "snapshot") === "live" ? createHttpFetcher(DEFAULT_PUBLIC_API_ORIGIN, 15_000, serverApiHeaders()) : createSnapshotFetcher(snapshot.responses);
     ask = (question) => askModel(model, fetcher, question);
     label = `provider-${provider}-${checked.value.model.replace(/[^a-z0-9.-]+/gi, "_")}`;
   } else {

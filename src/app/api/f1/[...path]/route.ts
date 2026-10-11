@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { apiBase } from "@/lib/config";
 import { isAllowedProxyPath } from "@/lib/proxy-allowlist.mjs";
 import { readBoundedPostBody } from "@/lib/read-bounded-post-body.mjs";
+import { proxyApiHeaders } from "@/lib/proxy-api-headers.mjs";
 
 // Browser requests stay same-origin: the Lab calls /api/f1/v1/f1/..., this
 // route forwards allow-listed read paths (and the grounded chat POST) upstream.
@@ -23,7 +24,7 @@ function upstreamUrl(request: NextRequest, path: string[]) {
 async function proxy(request: NextRequest, path: string[]) {
   if (!isAllowedProxyPath(request.method, path)) return jsonError(404, "Path not served by the Data Lab proxy.");
 
-  const headers = new Headers({ Accept: "application/json" });
+  const headers = proxyApiHeaders(request);
   let body: ArrayBuffer | undefined;
   if (request.method === "POST") {
     const boundedBody = await readBoundedPostBody(request);

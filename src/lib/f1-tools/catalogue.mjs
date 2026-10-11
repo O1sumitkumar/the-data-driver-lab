@@ -597,10 +597,10 @@ export function createProxyFetcher(base = "/api/f1", timeoutMs = 10_000) {
 }
 
 /** Node fetcher straight to an API origin (evaluation bench, MCP server). */
-export function createHttpFetcher(apiBase = DEFAULT_PUBLIC_API_ORIGIN, timeoutMs = 15_000) {
+export function createHttpFetcher(apiBase = DEFAULT_PUBLIC_API_ORIGIN, timeoutMs = 15_000, headers = { Accept: "application/json" }) {
   const base = apiBase.replace(/\/+$/, "");
   return async (path) => {
-    const response = await fetch(`${base}${path}`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(timeoutMs) });
+    const response = await fetch(`${base}${path}`, { headers, signal: AbortSignal.timeout(timeoutMs) });
     return { status: response.status, body: await readJson(response) };
   };
 }
