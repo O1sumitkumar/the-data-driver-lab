@@ -36,6 +36,13 @@ CI runs the same commands. End-to-end tests start a local mock API (`e2e/mock-ap
 at the production API. When a view needs a new endpoint, add it to `src/lib/proxy-allowlist.mjs`, to the mock
 API and to `docs/API.md`, with tests.
 
+## Files shared with thedatadriver.app
+
+Most of `src/` (the Lab views, charts, `src/lib/` helpers, the MCP server and the AI mode) is shared with the
+live site and mirrored into this repository. You can still change these files here: once your pull request
+is merged, a maintainer ports it to the site so the next sync keeps it. Tests, documentation, `e2e/`, the
+Docker files and the CI configuration belong to this repository only.
+
 ## Commits and pull requests
 
 - Branch from `main`: `feat/…`, `fix/…`, `docs/…`.
