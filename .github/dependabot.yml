@@ -8,9 +8,12 @@ updates:
       minor-and-patch:
         update-types: [minor, patch]
     ignore:
-      # eslint-config-next does not support ESLint 10 yet.
-      - dependency-name: eslint
+      # The Lab shares its sources with thedatadriver.app: major upgrades of the
+      # toolchain and libraries land on the site first, then are mirrored here.
+      - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # Pinned through "overrides" in package.json: newer rules flag shared code.
+      - dependency-name: eslint-plugin-react-hooks
   - package-ecosystem: github-actions
     directory: /
     schedule:
